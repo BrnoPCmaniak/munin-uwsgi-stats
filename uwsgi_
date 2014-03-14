@@ -33,8 +33,7 @@ name, p, mode = os.path.basename(__file__).partition('_')
 modes = {
     'listen_queue': 'listen queue',
     'listen_queue_errors': 'listen queue errors',
-
-    'requests': 'requests per ${graph_period}', 
+    'requests': 'requests per',
     'exceptions': 'exceptions',
     'vsz': 'physical memory',
     'tx': 'send bytes',
@@ -93,4 +92,3 @@ else:
     else:
         value = sum([x.get(mode, 0) for x in workers])
     print '%s.value %s' % (mode, value)
-
