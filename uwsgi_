@@ -33,7 +33,7 @@ name, p, mode = os.path.basename(__file__).partition('_')
 modes = {
     'listen_queue': 'listen queue',
     'listen_queue_errors': 'listen queue errors',
-    'requests': 'requests per',
+    'requests': 'requests',
     'exceptions': 'exceptions',
     'vsz': 'physical memory',
     'tx': 'send bytes',
