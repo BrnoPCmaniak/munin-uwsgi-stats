@@ -85,7 +85,7 @@ if len(sys.argv) > 1:
             if mode in ['requests', 'exceptions', 'tx']:
                 out += '%(name)s_{worker}s.type DERIVE\n'
                 out += '%(name)s_{worker}s.min 0\n'
-            out += "%(name)s_{worker}s.label %(name)s"
+            out += "%(name)s_{worker}s.label %(name)s\n"
             out = out.format(worker=worker['id'])
         out = out % {'name': mode, 'desc': modes[mode]}
         print out
