@@ -34,7 +34,7 @@ MODES = {
     'requests': ('requests', 'requests per ${graph_period}'),
     'exceptions': ('exceptions', 'exceptions per ${graph_period}'),
     'vsz': ('physical memory', 'physical memory'),
-    'tx': ('send bytes', 'send bytes'),
+    'tx': ('send bytes', 'send bytes per ${graph_period}'),
     'avg_rt': ('average response time (ms)', 'average reponse time (ms)'),
 }
 
