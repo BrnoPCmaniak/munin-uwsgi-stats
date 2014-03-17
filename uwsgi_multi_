@@ -4,17 +4,21 @@
 
 # your uwsgi stat socket addr/path here
 
-"""
+'''
 /etc/munin/plugin-conf.d/munin-node
 
 [uwsgi_*]
 env.addr 127.0.0.1:4999
 
-"""
+'''
 
 UWSGI_STATS = ''
 
-import os, os.path, sys, json, socket
+import os
+import os.path
+import sys
+import json
+import socket
 from pprint import pformat
 
 UWSGI_STATS = UWSGI_STATS or os.environ.get('addr', '')
@@ -36,6 +40,9 @@ MODES = {
 
 
 def get_uwsgi_stats():
+    '''
+    Get the json stats from the uwsgi stats socket and return a dict
+    '''
     if ':' in UWSGI_STATS:
         host, port = UWSGI_STATS.split(':')
         sfamily, addr = (socket.AF_INET, (host, int(port)))
@@ -59,28 +66,34 @@ def get_uwsgi_stats():
         raise Exception('unable to get uWSGI stats at {0}'.format(UWSGI_STATS))
 
     data = json.loads(raw_js or '{}')
-    workers = data.get('workers', [])
-    return data, workers
+    return data
 
 
 def print_stats():
-    data, workers = get_uwsgi_stats()
+    '''
+    Calculate values and print them out for munin to graph
+    '''
+    data = get_uwsgi_stats()
 
     if MODE in ['listen_queue', 'listen_queue_errors']:
         value = data.get(MODE, 0)
         print '{0}.value {1}'.format(MODE, value)
     elif MODE in ['avg_rt']:
-        for worker in workers:
-            value = worker.get(MODE, 0)/1000
+        for worker in data.get('workers', []):
+            value = worker.get(MODE, 0) / 1000
             print '{0}_{1}.value {2}'.format(MODE, worker['id'], value)
     else:
-        for worker in workers:
+        for worker in data.get('workers', []):
             value = worker.get(MODE, 0)
             print '{0}_{1}.value {2}'.format(MODE, worker['id'], value)
 
 
 def print_config():
-    _, workers = get_uwsgi_stats()
+    '''
+    Print the config for munin
+    '''
+    data = get_uwsgi_stats()
+    workers = data.get('workers', [])
     out = ('graph_title {desc}\n'
            'graph_vlabel {desc}\n'
            'graph_category uWSGI\n').format(desc=MODES[MODE])
@@ -99,6 +112,9 @@ def print_config():
 
 
 def main():
+    '''
+    Process args and do stuff.
+    '''
     if len(sys.argv) > 1:
         opt = sys.argv[1]
 
@@ -114,6 +130,7 @@ def main():
             print_config()
     else:
         print_stats()
+
 
 if __name__ == '__main__':
     main()
