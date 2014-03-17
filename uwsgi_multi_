@@ -31,8 +31,8 @@ NAME, MULTI, MODE = os.path.basename(__file__).split('_', 2)
 MODES = {
     'listen_queue': ('listen queue', 'listen queue'),
     'listen_queue_errors': ('listen queue errors', 'listen queue errors'),
-    'requests': ('requests', 'requests per ${{graph_period}}'),
-    'exceptions': ('exceptions', 'exceptions per ${{graph_period}}'),
+    'requests': ('requests', 'requests per ${graph_period}'),
+    'exceptions': ('exceptions', 'exceptions per ${graph_period}'),
     'vsz': ('physical memory', 'physical memory'),
     'tx': ('send bytes', 'send bytes'),
     'avg_rt': ('average response time (ms)', 'average reponse time (ms)'),
