@@ -13,12 +13,14 @@
 
 UWSGI_STATS = ''
 
-import os, os.path, sys, time, datetime, json, re, socket
+import os
+import os.path
+import sys
+import json
+import socket
 from pprint import pformat
 
-UWSGI_STATS = UWSGI_STATS or os.environ.get('addr', '')
-if not UWSGI_STATS:
-    raise Exception('uWSGI stats config not found. %s' % pformat(os.environ))
+UWSGI_STATS = os.environ.get('addr', '') or '127.0.0.1:49000'
 
 
 if ':' in UWSGI_STATS:
@@ -27,67 +29,101 @@ if ':' in UWSGI_STATS:
 else:
     sfamily, addr = (socket.AF_UNIX, UWSGI_STATS)
 
-name, p, mode = os.path.basename(__file__).partition('_')
+NAME, P, MODE = os.path.basename(__file__).partition('_')
 
 modes = {
-    'listen_queue': 'listen queue',
-    'listen_queue_errors': 'listen queue errors',
-    'requests': 'requests',
-    'exceptions': 'exceptions',
-    'vsz': 'physical memory',
-    'tx': 'send bytes',
-    'avg_rt': 'average response time (ms)',
+    'listen_queue': ('listen queue', 'listen queue'),
+    'listen_queue_errors': ('listen queue errors', 'listen queue errors'),
+    'requests': ('requests', 'requests per ${graph_period}'),
+    'exceptions': ('exceptions', 'exceptions per ${graph_period}'),
+    'vsz': ('physical memory', 'physical memory'),
+    'tx': ('send bytes', 'send bytes per ${graph_period}'),
+    'avg_rt': ('average response time (ms)', 'average reponse time (ms)'),
 }
 
+def get_uwsgi_stats():
+    '''
+    Get the json stats from the uwsgi stats socket and return a dict
+    '''
+    if ':' in UWSGI_STATS:
+        host, port = UWSGI_STATS.split(':')
+        sfamily, addr = (socket.AF_INET, (host, int(port)))
+    else:
+        sfamily, addr = (socket.AF_UNIX, UWSGI_STATS)
 
-
-if len(sys.argv)>1:
-    opt = sys.argv[1]
-
-    if opt == 'suggest':
-        print '\n'.join(modes.keys())
-    elif opt == 'install':
-        p = os.path.realpath(__file__)
-        for x in modes.keys():
-            os.system('ln -s %s /etc/munin/plugins/%s_%s' % (p, name, x))
-    elif opt == 'config' and mode in modes:
-        out = ('graph_title %(desc)s\n'
-               'graph_vlabel %(desc)s\n'
-               'graph_category uWSGI\n')
-        if mode in ['tx', 'vsz']:
-            out += 'graph_args --base 1024\n'
-        if mode in ['requests', 'exceptions', 'tx']:
-            out += '%(name)s.type DERIVE\n'
-            out += '%(name)s.min 0\n'
-        out += "%(name)s.label %(name)s"
-        out = out % {'name': mode, 'desc': modes[mode]}
-        print out
-else:
-
-
-    js = ''
+    raw_js = ''
     try:
-        s = socket.socket(sfamily, socket.SOCK_STREAM)
-        s.settimeout(3)
-        s.connect( addr )
+        sock = socket.socket(sfamily, socket.SOCK_STREAM)
+        sock.settimeout(3)
+        sock.connect(addr)
 
         while True:
-            data = s.recv(4096)
+            data = sock.recv(4096)
             if len(data) < 1:
                 break
-            js += data
+            raw_js += data
     except:
         import traceback
         traceback.print_exc()
-        raise Exception("unable to get uWSGI stats at %s" % UWSGI_STATS)
+        raise Exception('unable to get uWSGI stats at {0}'.format(UWSGI_STATS))
 
-    dd = json.loads(js or '{}')
-    workers = dd.get('workers', [])
+    data = json.loads(raw_js or '{}')
+    return data
 
-    if mode in ['listen_queue', 'listen_queue_errors']:
-        value = dd.get(mode, 0)
-    elif mode in ['avg_rt']:
-        value = sum([x.get(mode, 0)/1000 for x in workers]) / len(workers)
+def print_stats():
+    '''
+    Calculate values and print them out for munin to graph
+    '''
+    data = get_uwsgi_stats()
+    if MODE in ['listen_queue', 'listen_queue_errors']:
+        value = data.get(MODE, 0)
+        print '{0}.value {1}'.format(MODE, value)
+    elif MODE in ['avg_rt']:
+        value = sum([x.get(MODE, 0)/1000 for x in data.get('workers',[])]) / len(data.get('workers',[]))
+        print '{0}.value {1}'.format(MODE, value)
     else:
-        value = sum([x.get(mode, 0) for x in workers])
-    print '%s.value %s' % (mode, value)
+        value = sum([x.get(MODE, 0) for x in data.get('workers',[])])
+        print '{0}.value {1}'.format(MODE, value)
+
+def print_config():
+    '''
+    Print the config for munin
+    '''
+    data = get_uwsgi_stats()
+    workers = data.get('workers', [])
+    graph = ('graph_title {desc}\n'
+             'graph_vlabel {vlabel}\n'
+             'graph_category uWSGI\n').format(desc=modes[MODE][0],
+                                              vlabel=modes[MODE][1])
+    out = ''
+    if MODE in ['tx', 'vsz']:
+        graph += 'graph_args --base 1024\n'
+    if MODE in ['listen_queue', 'listen_queue_errors']:
+        out += '{name}.label {name}'.format(name=MODE)
+    if MODE in ['requests', 'exceptions', 'tx']:
+        out += '%(name)s.type DERIVE\n'
+        out += '%(name)s.min 0\n'
+    print graph + out
+
+def main():
+    '''
+    Process args and do stuff.
+    '''
+    if len(sys.argv) > 1:
+        opt = sys.argv[1]
+
+        if opt == 'suggest':
+            print '\n'.join(modes.keys())
+        elif opt == 'install':
+            path = os.path.realpath(__file__)
+            for mode in modes.keys():
+                os.system('ln -s {0} /etc/munin/plugins/{1}_{2}_{3}'.format(
+                    path, NAME, MULTI, mode))
+        elif opt == 'config' and MODE in modes:
+            print_config()
+    else:
+        print_stats()
+
+
+if __name__ == '__main__':
+    main()
