@@ -88,8 +88,8 @@ def print_config():
     '''
     data = get_uwsgi_stats()
     workers = data.get('workers', [])
-    graph = ('graph_title {desc}\n'
-             'graph_vlabel {vlabel}\n'
+    graph = ('graph_title "{desc}"\n'
+             'graph_vlabel "{vlabel}"\n'
              'graph_category uWSGI\n').format(desc=modes[MODE][0],
                                               vlabel=modes[MODE][1])
     out = ''
