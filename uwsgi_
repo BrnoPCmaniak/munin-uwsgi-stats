@@ -114,11 +114,6 @@ def main():
         elif opt == 'autoconf':
             if get_data():
                 print 'yes'
-        elif opt == 'install':
-            path = os.path.realpath(__file__)
-            for mode in modes.keys():
-                os.system('ln -s {0} /etc/munin/plugins/{1}_{2}_{3}'.format(
-                    path, NAME, MULTI, mode))
         elif opt == 'config' and MODE in modes:
             print_config()
     else:
