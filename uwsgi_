@@ -1,18 +1,15 @@
 #!/usr/bin/env python
-
-# coding: utf8
+# -*- python -*-
+#
+# Define env.addr variable in your settings file, e.g.
+#
+#/etc/munin/plugin-conf.d/munin-node
+#[uwsgi_*]
+#env.addr 127.0.0.1:49000
+#
 # Magic markers
 #%# capabilities=autoconf suggest
 #%# family=auto
-# your uwsgi stat socket addr/path here
-
-"""
-/etc/munin/plugin-conf.d/munin-node
-
-[uwsgi_*]
-env.addr 127.0.0.1:4999
-
-"""
 
 UWSGI_STATS = ''
 
