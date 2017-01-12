@@ -100,6 +100,8 @@ def print_config():
     if MODE in ['requests', 'exceptions', 'tx']:
         out += '%(name)s.type DERIVE\n'
         out += '%(name)s.min 0\n'
+    out += "%(name)s.label %(name)s"
+    out = out % {'name': MODE}
     print graph + out
 
 def main():
