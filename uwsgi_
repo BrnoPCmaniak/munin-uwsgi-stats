@@ -62,13 +62,10 @@ def get_uwsgi_stats():
             if len(data) < 1:
                 break
             raw_js += data
+        data = json.loads(raw_js or '{}')
+        return data
     except:
-        import traceback
-        traceback.print_exc()
-        raise Exception('unable to get uWSGI stats at {0}'.format(UWSGI_STATS))
-
-    data = json.loads(raw_js or '{}')
-    return data
+        print("no (unable to get uWSGI stats at %s)" % UWSGI_STATS)
 
 def print_stats():
     '''
@@ -114,6 +111,9 @@ def main():
 
         if opt == 'suggest':
             print '\n'.join(modes.keys())
+        elif opt == 'autoconf':
+            if get_data():
+                print 'yes'
         elif opt == 'install':
             path = os.path.realpath(__file__)
             for mode in modes.keys():
