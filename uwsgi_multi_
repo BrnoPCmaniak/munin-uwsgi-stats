@@ -102,7 +102,7 @@ def print_config():
             if MODE in ['requests', 'exceptions', 'tx']:
                 out += '{name}_{worker}.type DERIVE\n'
                 out += '{name}_{worker}.min 0\n'
-    out += "{name}_{worker}.label {name} {worker}\n"
+                out += "{name}_{worker}.label {name} {worker}\n"
     out = out.format(name=MODE, worker=worker['id'])
     print graph + out
 
