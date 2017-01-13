@@ -32,14 +32,14 @@ else:
 NAME, P, MODE = os.path.basename(__file__).partition('_')
 
 modes = {
-    'listen_queue': ('listen queue', 'listen queue'),
-    'listen_queue_errors': ('listen queue errors', 'listen queue errors'),
-    'requests': ('requests', 'requests per ${graph_period}'),
-    'exceptions': ('exceptions', 'exceptions per ${graph_period}'),
-    'vsz': ('physical memory', 'physical memory'),
-    'tx': ('send bytes', 'send bytes per ${graph_period}'),
-    'avg_rt': ('average response time (ms)', 'average reponse time (ms)'),
-    'rss': ('rss', 'rss'),
+    'listen_queue': ('Listen queue', 'listen queue slots used'),
+    'listen_queue_errors': ('Listen queue errors', 'listen queue errors'),
+    'requests': ('Requests', 'requests managed per ${graph_period}'),
+    'exceptions': ('Exceptions', 'exceptions per ${graph_period}'),
+    'vsz': ('Virtual memory', 'bytes'),
+    'tx': ('Transmitted data', 'bytes per ${graph_period}'),
+    'avg_rt': ('Average response time', 'time (ms)'),
+    'rss': ('Resident Set Size', 'bytes'),
 }
 
 def get_uwsgi_stats():
