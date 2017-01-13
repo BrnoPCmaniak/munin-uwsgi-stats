@@ -96,12 +96,12 @@ def print_config():
     if MODE in ['tx', 'vsz']:
         graph += 'graph_args --base 1024\n'
     if MODE in ['listen_queue', 'listen_queue_errors']:
-        out += '{name}.label {name}'.format(name=MODE)
+        out += '{name}.label {name}'
     if MODE in ['requests', 'exceptions', 'tx']:
-        out += '%(name)s.type DERIVE\n'
-        out += '%(name)s.min 0\n'
-    out += "%(name)s.label %(name)s"
-    out = out % {'name': MODE}
+        out += '{name}.type DERIVE\n'
+        out += '{name}.min 0\n'
+    out += "{name}.label {name}"
+    out = out.format(name=MODE)
     print graph + out
 
 def main():
