@@ -28,12 +28,14 @@ NAME, MULTI, MODE = os.path.basename(__file__).split('_', 2)
 modes = {
     'listen_queue': ('Listen queue', 'listen queue slots used'),
     'listen_queue_errors': ('Listen queue errors', 'listen queue errors'),
-    'requests': ('Requests', 'requests managed per ${graph_period}'),
-    'exceptions': ('Exceptions', 'exceptions per ${graph_period}'),
-    'vsz': ('Virtual memory', 'bytes'),
-    'tx': ('Transmitted data', 'bytes per ${graph_period}'),
-    'avg_rt': ('Average response time', 'time (ms)'),
-    'rss': ('Resident Set Size', 'bytes'),
+    'requests': ('Worker requests', 'worker requests managed per ${graph_period}'),
+    'exceptions': ('Worker exceptions', 'worker exceptions per ${graph_period}'),
+    'vsz': ('Worker virtual memory', 'bytes'),
+    'tx': ('Worker transmitted data', 'bytes per ${graph_period}'),
+    'avg_rt': ('Worker Average response time', 'time (ms)'),
+    'rss': ('Worker Resident Set Size', 'bytes'),
+    'respawn_count': ('Worker respawn count', 'times'),
+    'running_time': ('Worker running time', 'time (s)'),
 }
 
 
@@ -103,7 +105,7 @@ def print_config():
             if MODE in ['requests', 'exceptions', 'tx']:
                 out += '{name}_{worker}.type DERIVE\n'
                 out += '{name}_{worker}.min 0\n'
-            out += "{name}_{worker}.label {name} worker:{worker}\n"
+            out += "{name}_{worker}.label worker:{worker}\n"
             out = out.format(name=MODE, worker=worker['id'])
     print graph + out
 
