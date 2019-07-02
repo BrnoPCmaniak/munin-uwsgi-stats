@@ -106,21 +106,21 @@ def print_config():
     data = get_uwsgi_stats()
     workers = data.get('workers', [])
     if "-" in NAME:
-        graph = 'graph_title "{name}: {{desc}}"\n'.format(
+        graph = 'graph_title {name}: {{desc}}\n'.format(
             name=NAME.split("-",1)[1])
     else:
-        graph = 'graph_title "{desc}"\n'
+        graph = 'graph_title {desc}\n'
 
-    graph += ('graph_vlabel "{vlabel}"\n'
+    graph += ('graph_vlabel {vlabel}\n'
               'graph_category uWSGI\n')
     graph = graph.format(desc=modes[MODE][0], vlabel=modes[MODE][1])
     if MODE in ['tx', 'vsz', 'rss', 'respawn_count', 'requests']:
-        graph += 'graph_total "Total {name}"\n'.format(name=MODE)
+        graph += 'graph_total Total {name}\n'.format(name=MODE)
     out = ''
     if MODE in ['tx', 'vsz', 'rss']:
         graph += 'graph_args --base 1024\n'
     if MODE in ['listen_queue', 'listen_queue_errors']:
-        out += '{name}.label {name}'
+        out += '{name}.label {name}'.format(name=MODE)
     else:
         for worker in workers:
             if MODE in ['requests', 'exceptions', 'tx']:
