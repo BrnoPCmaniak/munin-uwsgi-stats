@@ -29,12 +29,6 @@ except ImportError:
 UWSGI_STATS = os.environ.get('addr', '') or '127.0.0.1:49000'
 
 
-if ':' in UWSGI_STATS:
-    t = UWSGI_STATS.split(':')
-    sfamily, addr = (socket.AF_INET, (t[0], int(t[1])) )
-else:
-    sfamily, addr = (socket.AF_UNIX, UWSGI_STATS)
-
 NAME, P, MODE = os.path.basename(__file__).partition('_')
 
 modes = {
@@ -103,10 +97,15 @@ def print_config():
     '''
     data = get_uwsgi_stats()
     workers = data.get('workers', [])
-    graph = ('graph_title "{desc}"\n'
-             'graph_vlabel "{vlabel}"\n'
-             'graph_category uWSGI\n').format(desc=modes[MODE][0],
-                                              vlabel=modes[MODE][1])
+    if "-" in NAME:
+        graph = 'graph_title "{name}: {{desc}}"\n'.format(
+            name=NAME.split("-",1)[1])
+    else:
+        graph = 'graph_title "{desc}"\n'
+
+    graph += ('graph_vlabel "{vlabel}"\n'
+              'graph_category uWSGI\n')
+    graph = graph.format(desc=modes[MODE][0], vlabel=modes[MODE][1])
     out = ''
     if MODE in ['tx', 'vsz', 'rss']:
         graph += 'graph_args --base 1024\n'
