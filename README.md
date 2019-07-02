@@ -14,7 +14,7 @@ Detailed uWSGI stats plugin for munin
 
 ## Config & test:
 
-1. Activate and configure stats server in your uWSGI installation (see [uWSGI Documentation](http://uwsgi-docs.readthedocs.io/en/latest/StatsServer.html) for more information). If you plan on obtaining memory statistics, you need to enable `memory-report = true` uWSGI option.
+1. Activate and configure stats server in your uWSGI installation (see [uWSGI Documentation](http://uwsgi-docs.readthedocs.io/en/latest/StatsServer.html) for more information). If you plan on obtaining memory statistics, you need to enable `memory-report = true` uWSGI option. If you use `stats-http` option you have to specify 'http://' in env.addr.
 2. Restart uWSGI. Verify that stats are activated and that there is a JSON output at your configured `host:port`, using `wget -O - 127.0.0.1:49000` or `nc 127.0.0.1 49000`.
 3. Edit `/etc/munin/plugin-conf.d/munin-node` to reflect your uWSGI stats setting, e.g.:
 

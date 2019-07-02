@@ -20,6 +20,12 @@ import json
 import socket
 from pprint import pformat
 
+try:
+    import urllib2
+except ImportError:
+    import urllib.request as urllib2
+
+
 UWSGI_STATS = os.environ.get('addr', '') or '127.0.0.1:49000'
 
 
@@ -46,7 +52,11 @@ def get_uwsgi_stats():
     '''
     Get the json stats from the uwsgi stats socket and return a dict
     '''
-    if ':' in UWSGI_STATS:
+    http_stats = False
+    if UWSGI_STATS.startswith('http://'):
+        http_stats = True
+        addr = UWSGI_STATS
+    elif ':' in UWSGI_STATS:
         host, port = UWSGI_STATS.split(':')
         sfamily, addr = (socket.AF_INET, (host, int(port)))
     else:
@@ -54,15 +64,19 @@ def get_uwsgi_stats():
 
     raw_js = ''
     try:
-        sock = socket.socket(sfamily, socket.SOCK_STREAM)
-        sock.settimeout(3)
-        sock.connect(addr)
+        if http_stats:
+            r = urllib2.urlopen(addr)
+            raw_js =  r.read().decode('utf8', 'ignore')
+        else:
+            sock = socket.socket(sfamily, socket.SOCK_STREAM)
+            sock.settimeout(3)
+            sock.connect(addr)
 
-        while True:
-            data = sock.recv(4096)
-            if len(data) < 1:
-                break
-            raw_js += data
+            while True:
+                data = sock.recv(4096)
+                if len(data) < 1:
+                    break
+                raw_js += data
         data = json.loads(raw_js or '{}')
         return data
     except:
