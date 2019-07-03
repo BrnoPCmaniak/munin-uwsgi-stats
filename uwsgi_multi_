@@ -34,13 +34,13 @@ NAME, MULTI, MODE = os.path.basename(__file__).split('_', 2)
 modes = {
     'listen_queue': ('Listen queue', 'listen queue slots used'),
     'listen_queue_errors': ('Listen queue errors', 'listen queue errors'),
-    'requests': ('Worker requests', 'worker requests managed per ${graph_period}'),
+    'requests': ('Worker requests', 'worker requests'),
     'exceptions': ('Worker exceptions', 'worker exceptions per ${graph_period}'),
     'vsz': ('Worker virtual memory', 'bytes'),
     'tx': ('Worker transmitted data', 'bytes per ${graph_period}'),
     'avg_rt': ('Worker Average response time', 'time (ms)'),
     'rss': ('Worker Resident Set Size', 'bytes'),
-    'respawn_count': ('Worker respawn count', 'times'),
+    'respawn_count': ('Worker respawn count', 'times per ${graph_period}'),
     'running_time': ('Worker running time', 'time (s)'),
 }
 
@@ -122,10 +122,19 @@ def print_config():
     if MODE in ['listen_queue', 'listen_queue_errors']:
         out += '{name}.label {name}'.format(name=MODE)
     else:
+        first_worker = True
         for worker in workers:
-            if MODE in ['requests', 'exceptions', 'tx']:
+            if MODE in ['requests', 'respawn_count', 'exceptions', 'tx']:
                 out += '{name}_{worker}.type DERIVE\n'
                 out += '{name}_{worker}.min 0\n'
+            elif MODE in ['vsz', 'rss']:
+                if first_worker:
+                    out += '{name}_{worker}.draw AREA\n'
+                    first_worker = False
+                else:
+                    out += '{name}_{worker}.draw STACK\n'
+            if MODE == 'respawn_count':
+                out += '{name}_{worker}.graph_period minute\n'
             out += "{name}_{worker}.label worker:{worker}\n"
             out = out.format(name=MODE, worker=worker['id'])
     print graph + out
@@ -141,8 +150,7 @@ def main():
         if opt == 'suggest':
             print '\n'.join(modes.keys())
         elif opt == 'autoconf':
-            if get_data():
-                print 'yes'
+            print 'yes'
         elif opt == 'config' and MODE in modes:
             print_config()
     else:

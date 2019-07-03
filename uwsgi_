@@ -126,8 +126,7 @@ def main():
         if opt == 'suggest':
             print '\n'.join(modes.keys())
         elif opt == 'autoconf':
-            if get_data():
-                print 'yes'
+            print 'yes'
         elif opt == 'config' and MODE in modes:
             print_config()
     else:
